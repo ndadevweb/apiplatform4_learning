@@ -1,0 +1,64 @@
+services:
+  apiplatform4_php:
+    container_name: apiplatform4_php
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      args:
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: "1"
+      XDEBUG_MODE: develop,debug
+      XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003"
+    volumes:
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./backend:/app:delegated
+    expose:
+      - 9000
+    working_dir: /app
+    healthcheck:
+      test: ["CMD", "php", "-r", "echo 1;"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  apiplatform4_nginx:
+    container_name: apiplatform4_nginx
+    image: nginx:1.28
+    ports:
+      - "${BACKEND_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/public:/app/public:ro
+    depends_on:
+      - apiplatform4_php
+    restart: unless-stopped
+
+  apiplatform4_postgres:
+    container_name: apiplatform4_postgres
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: apiplatform4_db
+      POSTGRES_USER: apiplatform4_u
+      POSTGRES_PASSWORD: apiplatform4_p
+      TZ: Europe/Paris
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "apiplatform4_db", "-U", "apiplatform4_u"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - apiplatform4_database_data:/var/lib/postgresql/data:rw
+      # - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro  # Seed/init scripts (optional)
+    # ports:
+    #   - "5432:5432"                          # Expose only if you need to connect from host tools
+    restart: unless-stopped                    # Auto-restart in dev
+    stop_grace_period: 60s                     # Give PostgreSQL time to shutdown cleanly
+
+volumes:
+  apiplatform4_database_data:
