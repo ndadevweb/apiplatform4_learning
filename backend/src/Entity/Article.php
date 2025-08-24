@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
@@ -12,15 +13,25 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
-// #[ApiResource(
-//     operations: [
-//         new Get()
-//     ]
-// )]
 #[Get()]
+#[GetCollection(
+    paginationItemsPerPage: 20,
+    paginationClientEnabled: true,
+    paginationClientItemsPerPage: true,
+    uriTemplate: '/articles-collection-simple',
+    name: 'collectionSimple'
+)]
+#[GetCollection(
+    paginationItemsPerPage: 20,
+    paginationClientEnabled: true,
+    paginationClientItemsPerPage: true,
+    uriTemplate: '/articles-collection-special',
+    name: 'collectionSpecial'
+)]
 #[Post()]
 #[Put()]
 #[Patch()]
+#[Delete()]
 class Article
 {
     #[ORM\Id]
