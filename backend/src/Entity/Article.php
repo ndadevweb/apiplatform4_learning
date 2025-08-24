@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Put;
 use App\Repository\ArticleRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 #[Get()]
@@ -40,9 +41,17 @@ class Article
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'The title should not be empty')]
+    #[Assert\Length(
+        min: 3,
+        max: 100,
+        minMessage: 'The title should be at least 3 characters',
+        maxMessage: 'The title cannot be longer 100 characters'
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'The "content" should not be empty')]
     private ?string $content = null;
 
     #[ORM\Column]
