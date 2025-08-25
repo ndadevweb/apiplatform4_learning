@@ -2,6 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -33,6 +36,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 // )]
 #[GetCollection(
     normalizationContext: ['groups' => ['read']]
+    // filters: ['article.search_filter']
 )]
 #[Post(
     denormalizationContext: ['groups' => ['write']],
@@ -41,6 +45,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Put()]
 #[Patch()]
 #[Delete()]
+// #[ApiFilter(SearchFilter::class, properties: ['title' => 'partial', 'content' => 'exact'])]
 class Article
 {
     #[ORM\Id]
@@ -58,6 +63,8 @@ class Article
         maxMessage: 'The title cannot be longer 100 characters'
     )]
     #[Groups(['read', 'write'])]
+    // #[ApiFilter(SearchFilter::class, strategy: 'exact')] // partial | exact
+    // #[ApiFilter(OrderFilter::class)]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -71,6 +78,7 @@ class Article
 
     #[ORM\ManyToOne(inversedBy: 'article')]
     #[Groups(['read', 'write'])]
+    #[ApiFilter(SearchFilter::class, properties: ['author.firstName' => 'partial'])]
     private ?Author $author = null;
 
     public function getId(): ?int
