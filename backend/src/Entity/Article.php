@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Repository\ArticleRepository;
+use App\State\CustomGetCollectionProvider;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -35,7 +36,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 //     name: 'collectionSpecial'
 // )]
 #[GetCollection(
-    normalizationContext: ['groups' => ['read']]
+    normalizationContext: ['groups' => ['read']],
+    provider: CustomGetCollectionProvider::class
     // filters: ['article.search_filter']
 )]
 #[Post(
