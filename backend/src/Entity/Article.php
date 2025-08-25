@@ -11,25 +11,33 @@ use ApiPlatform\Metadata\Put;
 use App\Repository\ArticleRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 #[Get()]
+// #[GetCollection(
+//     paginationItemsPerPage: 20,
+//     paginationClientEnabled: true,
+//     paginationClientItemsPerPage: true,
+//     uriTemplate: '/articles-collection-simple',
+//     name: 'collectionSimple'
+// )]
+// #[GetCollection(
+//     paginationItemsPerPage: 20,
+//     paginationClientEnabled: true,
+//     paginationClientItemsPerPage: true,
+//     uriTemplate: '/articles-collection-special',
+//     name: 'collectionSpecial'
+// )]
 #[GetCollection(
-    paginationItemsPerPage: 20,
-    paginationClientEnabled: true,
-    paginationClientItemsPerPage: true,
-    uriTemplate: '/articles-collection-simple',
-    name: 'collectionSimple'
+    normalizationContext: ['groups' => ['read']]
 )]
-#[GetCollection(
-    paginationItemsPerPage: 20,
-    paginationClientEnabled: true,
-    paginationClientItemsPerPage: true,
-    uriTemplate: '/articles-collection-special',
-    name: 'collectionSpecial'
+#[Post(
+    denormalizationContext: ['groups' => ['write']],
+    normalizationContext: ['groups' => ['read']]
 )]
-#[Post()]
 #[Put()]
 #[Patch()]
 #[Delete()]
@@ -38,6 +46,7 @@ class Article
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -48,14 +57,21 @@ class Article
         minMessage: 'The title should be at least 3 characters',
         maxMessage: 'The title cannot be longer 100 characters'
     )]
+    #[Groups(['read', 'write'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'The "content" should not be empty')]
+    #[Groups(['read', 'write'])]
     private ?string $content = null;
 
     #[ORM\Column]
+    #[Groups(['write'])]
     private ?\DateTimeImmutable $publishedAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'article')]
+    #[Groups(['read', 'write'])]
+    private ?Author $author = null;
 
     public function getId(): ?int
     {
@@ -94,6 +110,18 @@ class Article
     public function setPublishedAt(\DateTimeImmutable $publishedAt): static
     {
         $this->publishedAt = $publishedAt;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?Author
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?Author $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }
