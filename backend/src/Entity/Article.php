@@ -11,8 +11,10 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Dto\ArticleAuthorRequestDto;
 use App\Dto\ArticleAuthorResponseDto;
 use App\Repository\ArticleRepository;
+use App\State\ArticleAuthorStateProcessor;
 use App\State\ArticleAuthorStateProvider;
 use App\State\CustomGetCollectionProvider;
 use Doctrine\DBAL\Types\Types;
@@ -46,6 +48,13 @@ use Symfony\Component\Validator\Constraints as Assert;
     uriTemplate: 'article-author',
     name: 'articleAuthor',
     provider: ArticleAuthorStateProvider::class,
+    output: ArticleAuthorResponseDto::class
+)]
+#[Post(
+    uriTemplate: 'article-author',
+    name: 'articleAuthorPost',
+    processor: ArticleAuthorStateProcessor::class,
+    input: ArticleAuthorRequestDto::class,
     output: ArticleAuthorResponseDto::class
 )]
 #[Post(
