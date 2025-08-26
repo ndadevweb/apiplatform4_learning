@@ -48,7 +48,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     uriTemplate: 'article-author',
     name: 'articleAuthor',
     provider: ArticleAuthorStateProvider::class,
-    output: ArticleAuthorResponseDto::class
+    output: ArticleAuthorResponseDto::class,
+    security: 'is_granted("ROLE_USER")'
 )]
 #[Post(
     uriTemplate: 'article-author',
