@@ -11,7 +11,9 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Dto\ArticleAuthorResponseDto;
 use App\Repository\ArticleRepository;
+use App\State\ArticleAuthorStateProvider;
 use App\State\CustomGetCollectionProvider;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -39,6 +41,12 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['read']],
     provider: CustomGetCollectionProvider::class
     // filters: ['article.search_filter']
+)]
+#[GetCollection(
+    uriTemplate: 'article-author',
+    name: 'articleAuthor',
+    provider: ArticleAuthorStateProvider::class,
+    output: ArticleAuthorResponseDto::class
 )]
 #[Post(
     denormalizationContext: ['groups' => ['write']],
